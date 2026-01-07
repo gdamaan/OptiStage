@@ -20,6 +20,9 @@
         <mapping class="fr.ensitech.myproject.entity.Address"/>
         <mapping class="fr.ensitech.myproject.entity.Question"/>
         <mapping class="fr.ensitech.myproject.entity.PasswordHistory"/>
+        <mapping class="fr.ensitech.myproject.entity.Administrator"/>
+        <mapping class="fr.ensitech.myproject.entity.Enterprise"/>
+        <mapping class="fr.ensitech.myproject.entity.InternshipOffer"/>
 
     </session-factory>
 </hibernate-configuration>

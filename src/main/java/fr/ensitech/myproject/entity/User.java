@@ -62,4 +62,7 @@ public class User {
     @Column(name = "last_password_update")
     private Date lastPasswordUpdate;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Enterprise enterprise;
+
 }
