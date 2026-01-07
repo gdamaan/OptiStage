@@ -46,6 +46,9 @@ public class User {
 	@Column(name = "active", nullable = false)
 	private Boolean isActive;
 
+    @Column(name = "role", nullable = false, length = 16)
+    private String role;
+
 	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<Address> addresses;
 
