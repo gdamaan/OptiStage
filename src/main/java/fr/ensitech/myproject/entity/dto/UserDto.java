@@ -13,6 +13,7 @@ public class UserDto {
     private String firstname;
     private String lastname;
     private String email;
+    private String role;
     @JsonFormat(pattern = "dd/MM/yyyy")
     private Date birthdate;
     private Boolean isActive;

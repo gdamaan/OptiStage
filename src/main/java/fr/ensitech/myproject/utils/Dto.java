@@ -16,6 +16,7 @@ public abstract class Dto {
         userDto.setLastname(user.getLastname());
         userDto.setEmail(user.getEmail());
         userDto.setBirthdate(user.getBirthdate());
+        userDto.setRole(user.getRole());
         userDto.setIsActive(user.getIsActive());
         return userDto;
     }
