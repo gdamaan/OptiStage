@@ -95,4 +95,17 @@ public class EnterpriseRepository implements IEnterpriseRepository {
             if (session != null && session.isOpen()) session.close();
         }
     }
+
+    @Override
+    public Enterprise getEnterpriseBySiret(String siret) throws Exception {
+        Session session = null;
+        try {
+            session = HibernateConnector.getSession();
+            Query<Enterprise> query = session.createQuery("from Enterprise e where e.siret = :siret", Enterprise.class);
+            query.setParameter("siret", siret);
+            return query.uniqueResult();
+        } finally {
+            if (session != null && session.isOpen()) session.close();
+        }
+    }
 }

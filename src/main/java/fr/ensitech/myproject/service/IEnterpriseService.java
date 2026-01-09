@@ -1,15 +1,13 @@
-package fr.ensitech.myproject.repository;
+package fr.ensitech.myproject.service;
 
 import fr.ensitech.myproject.entity.Enterprise;
 import java.util.List;
 
-public interface IEnterpriseRepository {
-    void addEnterprise(Enterprise enterprise) throws Exception;
+public interface IEnterpriseService {
+    void createEnterprise(Enterprise enterprise) throws Exception;
     Enterprise getEnterpriseById(Long id) throws Exception;
     Enterprise getEnterpriseByUserId(Long userId) throws Exception;
     void updateEnterprise(Enterprise enterprise) throws Exception;
-    void deleteEnterprise(Enterprise enterprise) throws Exception;
+    void deleteEnterprise(Long id) throws Exception;
     List<Enterprise> getAllEnterprises() throws Exception;
-    Enterprise getEnterpriseBySiret(String siret) throws Exception;
-
 }

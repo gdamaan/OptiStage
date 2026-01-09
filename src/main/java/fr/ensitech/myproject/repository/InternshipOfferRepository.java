@@ -93,4 +93,20 @@ public class InternshipOfferRepository implements IInternshipOfferRepository {
             if (session != null && session.isOpen()) session.close();
         }
     }
+
+    @Override
+    public List<InternshipOffer> getOffersByTitle(String titleSearched) throws Exception {
+        Session session = null;
+        try {
+            session = HibernateConnector.getSession();
+            String hqlQuery = "from InternshipOffer offer where lower(offer.title) like lower(:titleParameter)";
+            return session.createQuery(hqlQuery, InternshipOffer.class)
+                    .setParameter("titleParameter", "%" + titleSearched + "%")
+                    .list();
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
+    }
 }
