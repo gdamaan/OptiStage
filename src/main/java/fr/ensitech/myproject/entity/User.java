@@ -46,8 +46,9 @@ public class User {
 	@Column(name = "active", nullable = false)
 	private Boolean isActive;
 
-    @Column(name = "role", nullable = false, length = 16)
-    private String role;
+    @ManyToOne(fetch = FetchType.EAGER) // EAGER car on a souvent besoin du rôle immédiatement
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
 
 	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<Address> addresses;

@@ -1,6 +1,7 @@
 package fr.ensitech.myproject.service;
 
 import fr.ensitech.myproject.entity.PasswordHistory;
+import fr.ensitech.myproject.entity.Role;
 import fr.ensitech.myproject.entity.User;
 import fr.ensitech.myproject.repository.*;
 import fr.ensitech.myproject.utils.PasswordHasher;
@@ -13,6 +14,7 @@ public class UserService implements IUserService {
 
     private final IUserRepository userRepository = new UserRepository();
     private final IPasswordHistoryRepository historyRepository = new PasswordHistoryRepository();
+    private final RoleRepository roleRepository = new RoleRepository();
 
     @Override
     public boolean subscribe(User user) throws Exception {
@@ -20,6 +22,16 @@ public class UserService implements IUserService {
         if (existingUser != null) {
             return false;
         }
+
+        if (user.getRole() == null || user.getRole().getName() == null) {
+            throw new Exception("Le rôle de l'utilisateur n'est pas spécifié.");
+        }
+
+        Role role = roleRepository.getRoleByName(user.getRole().getName());
+        if (role == null) {
+            throw new Exception("Le rôle spécifié n'existe pas dans la base de données : " + user.getRole().getName());
+        }
+        user.setRole(role);
 
         String clearPassword = user.getPassword();
         String hashedPassword = PasswordHasher.hashPassword(clearPassword);
