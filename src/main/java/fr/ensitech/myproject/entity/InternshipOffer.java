@@ -23,6 +23,9 @@ public class InternshipOffer {
     @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "ville", nullable = false, length = 100)
+    private String ville;
+
     @Temporal(TemporalType.DATE)
     @Column(name = "start_date")
     private Date startDate;
