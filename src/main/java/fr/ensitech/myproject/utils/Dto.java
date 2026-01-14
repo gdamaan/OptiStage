@@ -105,4 +105,25 @@ public abstract class Dto {
 
         return enterprise;
     }
+
+    public static InternshipOffer fromDto(InternshipOfferDto dto, Enterprise enterprise) {
+        if (dto == null) return null;
+
+        InternshipOffer offer = new InternshipOffer();
+        offer.setId(dto.getId());
+        offer.setTitle(dto.getTitle());
+        offer.setDescription(dto.getDescription());
+        offer.setVille(dto.getVille());
+        offer.setStartDate(dto.getStartDate());
+        offer.setEndDate(dto.getEndDate());
+        offer.setRemuneration(dto.getSalary());
+
+        offer.setStatus("ACTIVE");
+
+        if (enterprise != null) {
+            offer.setEnterprise(enterprise);
+        }
+
+        return offer;
+    }
 }

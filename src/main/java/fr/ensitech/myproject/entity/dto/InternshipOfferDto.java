@@ -13,4 +13,5 @@ public class InternshipOfferDto {
     private Date endDate;
     private double salary;
     private String enterpriseName; // On ne prend que le nom, pas toute l'entité Enterprise
+    private Long enterpriseId; // Pour la création (Input)
 }
