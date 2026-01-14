@@ -83,4 +83,26 @@ public abstract class Dto {
 
         return dto;
     }
+
+    // Ajoutez cette méthode à la fin de votre classe Dto
+    public static Enterprise fromDto(EnterpriseDto dto, User manager) {
+        if (dto == null) return null;
+
+        Enterprise enterprise = new Enterprise();
+        // Si l'ID est présent (cas de l'update), on le garde
+        enterprise.setId(dto.getId());
+
+        enterprise.setName(dto.getName());
+        enterprise.setSiret(dto.getSiret());
+        enterprise.setSector(dto.getSector());
+        enterprise.setDescription(dto.getDescription());
+        enterprise.setWebsite(dto.getWebsite());
+
+        // On attache le recruteur qu'on a récupéré
+        if (manager != null) {
+            enterprise.setUser(manager);
+        }
+
+        return enterprise;
+    }
 }

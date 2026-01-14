@@ -14,6 +14,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Path("enterprises")
 @Produces(MediaType.APPLICATION_JSON)
@@ -28,103 +29,111 @@ public class EnterpriseController implements IEnterpriseController {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createEnterprise(EnterpriseDto dto) {
-        // 1. Validation des boucliers (Champs obligatoires)
-        if (dto == null
-                || dto.getName() == null || dto.getName().isBlank()
-                || dto.getSiret() == null || dto.getSiret().isBlank()
-                || dto.getManagerId() == null || dto.getManagerId() <= 0) {
-
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("Données invalides : Nom, SIRET et ID du Manager sont obligatoires.")
-                    .build();
+        if (dto == null || dto.getManagerId() == null) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Manager ID obligatoire").build();
         }
 
         try {
-            // 2. Récupération du Recruteur (Manager)
             User manager = userService.getUserById(dto.getManagerId());
             if (manager == null) {
-                return Response.status(Response.Status.NOT_FOUND)
-                        .entity("Aucun utilisateur trouvé avec l'ID " + dto.getManagerId())
-                        .build();
+                return Response.status(Response.Status.NOT_FOUND).entity("Recruteur introuvable").build();
             }
-
-            // 3. Transformation DTO -> Entity (Assemblage de l'armure)
-            Enterprise enterprise = new Enterprise();
-            enterprise.setName(dto.getName());
-            enterprise.setSiret(dto.getSiret());
-            enterprise.setSector(dto.getSector());
-            enterprise.setDescription(dto.getDescription());
-            enterprise.setWebsite(dto.getWebsite());
-
-            // Liaison avec le manager
-            enterprise.setUser(manager);
-
-            // 4. Appel du Service (Logique métier)
+            Enterprise enterprise = Dto.fromDto(dto, manager);
             enterpriseService.createEnterprise(enterprise);
 
-            // 5. Réponse (Succès 201 Created)
-            return Response.status(Response.Status.CREATED)
-                    .entity(Dto.enterpriseToDto(enterprise))
-                    .build();
+            return Response.status(Response.Status.CREATED).entity(Dto.enterpriseToDto(enterprise)).build();
 
         } catch (Exception e) {
             e.printStackTrace();
-            // Le service renvoie une exception si le SIRET existe déjà ou si le user a déjà une entreprise
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(e.getMessage())
-                    .build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
     }
 
-    // URI => http://localhost:9991/ws/rest/enterprises/all
+    // URI => http://localhost:9991/ws/rest/enterprises/update
+    @PUT
+    @Path("/update")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Override
+    public Response updateEnterprise(EnterpriseDto dto) {
+        if (dto == null || dto.getId() == null) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("ID de l'entreprise obligatoire pour modification").build();
+        }
+        try {
+            Enterprise existing = enterpriseService.getEnterpriseById(dto.getId());
+            if (existing == null) {
+                return Response.status(Response.Status.NOT_FOUND).entity("Entreprise introuvable").build();
+            }
+
+
+            Enterprise toUpdate = Dto.fromDto(dto, existing.getUser());
+
+            enterpriseService.updateEnterprise(toUpdate);
+
+            return Response.status(Response.Status.OK).entity(Dto.enterpriseToDto(toUpdate)).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+        }
+    }
+
+    // URI => http://localhost:9991/ws/rest/enterprises/delete/5
+    @DELETE
+    @Path("/delete/{id}")
+    @Override
+    public Response deleteEnterprise(@PathParam("id") Long id) {
+        try {
+            enterpriseService.deleteEnterprise(id);
+            return Response.status(Response.Status.NO_CONTENT).build(); // 204 No Content (Standard pour un delete)
+        } catch (Exception e) {
+            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+        }
+    }
+
+    // URI => http://localhost:9991/ws/rest/enterprises/manager/1
+    @GET
+    @Path("/manager/{id}")
+    @Override
+    public Response getEnterpriseByManagerId(@PathParam("id") Long managerId) {
+        try {
+            Enterprise enterprise = enterpriseService.getEnterpriseByUserId(managerId);
+            if (enterprise == null) {
+                return Response.status(Response.Status.NOT_FOUND).entity("Aucune entreprise pour ce manager").build();
+            }
+            return Response.status(Response.Status.OK).entity(Dto.enterpriseToDto(enterprise)).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+        }
+    }
+
+    // TODO Faire la méthode dans le SERVICE
+    @GET
+    @Path("/sector/{sector}")
+    @Override
+    public Response getEnterprisesBySector(@PathParam("sector") String sector) {
+        return null;
+    }
+
+
     @GET
     @Path("/all")
     public Response getAllEnterprises() {
         try {
             List<Enterprise> enterprises = enterpriseService.getAllEnterprises();
             List<EnterpriseDto> dtos = new ArrayList<>();
-
             enterprises.forEach(e -> dtos.add(Dto.enterpriseToDto(e)));
-
             return Response.status(Response.Status.OK).entity(dtos).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
     }
 
-    @Override
-    public Response updateEnterprise(EnterpriseDto enterpriseDto) throws Exception {
-        return null;
-    }
-
-    @Override
-    public Response deleteEnterprise(Long id) throws Exception {
-
-        return null;
-    }
-
-    @Override
-    public Response getEnterprisesBySector(String sector) throws Exception {
-        return null;
-    }
-
-    @Override
-    public Response getEnterpriseByManagerId(Long managerId) throws Exception {
-        return null;
-    }
-
-    // URI => http://localhost:9991/ws/rest/enterprises/1
     @GET
     @Path("/{id}")
     public Response getEnterpriseById(@PathParam("id") Long id) {
-        if (id == null || id <= 0) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("ID invalide").build();
-        }
+        if (id == null || id <= 0) return Response.status(Response.Status.BAD_REQUEST).build();
         try {
             Enterprise enterprise = enterpriseService.getEnterpriseById(id);
-            if (enterprise == null) {
-                return Response.status(Response.Status.NOT_FOUND).entity("Entreprise introuvable").build();
-            }
+            if (enterprise == null) return Response.status(Response.Status.NOT_FOUND).build();
             return Response.status(Response.Status.OK).entity(Dto.enterpriseToDto(enterprise)).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();

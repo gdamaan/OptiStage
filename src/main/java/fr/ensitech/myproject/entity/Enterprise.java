@@ -31,7 +31,7 @@ public class Enterprise {
     @Column(name = "website", nullable = true, length = 100)
     private String website;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
