@@ -8,7 +8,7 @@ public class InternshipOfferDto {
     private Long id;
     private String title;
     private String description;
-    private String ville;
+    private String location;
     private Date startDate;
     private Date endDate;
     private double salary;

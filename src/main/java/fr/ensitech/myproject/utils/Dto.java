@@ -28,11 +28,12 @@ public abstract class Dto {
         dto.setStartDate(offer.getStartDate());
         dto.setEndDate(offer.getEndDate());
         dto.setSalary(offer.getRemuneration());
-        dto.setVille(offer.getVille());
+        dto.setLocation(offer.getVille());
 
         // On extrait le nom de l'entreprise si elle existe
         if (offer.getEnterprise() != null) {
             dto.setEnterpriseName(offer.getEnterprise().getName());
+            dto.setEnterpriseId(offer.getEnterprise().getId());
         }
 
         return dto;
@@ -113,7 +114,7 @@ public abstract class Dto {
         offer.setId(dto.getId());
         offer.setTitle(dto.getTitle());
         offer.setDescription(dto.getDescription());
-        offer.setVille(dto.getVille());
+        offer.setVille(dto.getLocation());
         offer.setStartDate(dto.getStartDate());
         offer.setEndDate(dto.getEndDate());
         offer.setRemuneration(dto.getSalary());

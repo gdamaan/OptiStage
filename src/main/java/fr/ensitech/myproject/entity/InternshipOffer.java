@@ -40,7 +40,7 @@ public class InternshipOffer {
     @Column(name = "status", length = 20)
     private String status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "enterprise_id", nullable = false)
     @ToString.Exclude
     private Enterprise enterprise;
