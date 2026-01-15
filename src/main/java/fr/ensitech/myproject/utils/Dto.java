@@ -127,4 +127,25 @@ public abstract class Dto {
 
         return offer;
     }
+
+    public static Application fromDto(ApplicationDto dto, User student, InternshipOffer offer) {
+        if (dto == null) return null;
+
+        Application app = new Application();
+        app.setId(dto.getId());
+        // La lettre de motivation est le seul champ "texte" que l'étudiant envoie
+        app.setMotivationLetter(dto.getMotivationLetter());
+        app.setApplyDate(new java.util.Date());
+        app.setStatus("PENDING");
+
+        //  liens relations
+        if (student != null) {
+            app.setStudent(student);
+        }
+        if (offer != null) {
+            app.setOffer(offer);
+        }
+
+        return app;
+    }
 }
