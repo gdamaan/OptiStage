@@ -4,6 +4,8 @@ import fr.ensitech.myproject.entity.Question;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import java.util.List;
+
 public class QuestionRepository implements IQuestionRepository {
 
     @Override
@@ -22,6 +24,8 @@ public class QuestionRepository implements IQuestionRepository {
             }
         }
     }
+
+
 
     @Override
     public Question getQuestionById(int id) {
@@ -79,5 +83,21 @@ public class QuestionRepository implements IQuestionRepository {
                 session.close();
             }
         }
+    }
+
+    @Override
+    public List<Question> getQuestions() {
+        Session session = null;
+        try {
+            session = HibernateConnector.getSession();
+            List<Question> questions = session.createQuery("FROM Question", Question.class).list();
+            return questions;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+        if (session != null && session.isOpen()) {
+        session.close();}
+        }
+        return null;
     }
 }
