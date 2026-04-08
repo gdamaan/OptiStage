@@ -21,7 +21,10 @@ public class Main {
 
             final URI BASE_URI = URI.create("http://localhost:9991/ws/rest");
 
-            ResourceConfig rc =  new ResourceConfig().packages("fr.ensitech.myproject.controller.rest");
+            ResourceConfig rc = new ResourceConfig().packages(
+                    "fr.ensitech.myproject.controller.rest",
+                    "fr.ensitech.myproject.filter"
+            );
             ServiceLocator locator = ServiceLocatorUtilities.createAndPopulateServiceLocator();
             HttpServer server = GrizzlyHttpServerFactory.createHttpServer(BASE_URI, rc, locator);
             server.start();
