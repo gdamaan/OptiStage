@@ -148,4 +148,13 @@ public abstract class Dto {
 
         return app;
     }
+
+    // Dans fr.ensitech.myproject.utils.Dto
+    public static QuestionDto questionToDto(Question question) {
+        if (question == null) return null;
+        return new QuestionDto(
+                question.getId(),
+                question.getQuestion()
+        );
+    }
 }
