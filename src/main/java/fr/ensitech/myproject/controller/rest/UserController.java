@@ -1,6 +1,7 @@
 package fr.ensitech.myproject.controller.rest;
 
 import fr.ensitech.myproject.entity.User;
+import fr.ensitech.myproject.entity.dto.LoginRequest;
 import fr.ensitech.myproject.entity.dto.UserDto;
 import fr.ensitech.myproject.service.IUserService;
 import fr.ensitech.myproject.service.UserService;
@@ -9,6 +10,7 @@ import fr.ensitech.myproject.utils.PasswordHasher;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.Date;
@@ -193,53 +195,51 @@ public class UserController implements IUserController{
 
 
     @POST
-    @Path("/login/{email}/{password}")
+    @Path("/login")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Override
-    public Response login(@PathParam("email") String email, @PathParam("password") String password) {
-        if (email == null || email.isBlank() || password == null || password.isBlank()) {
+    public Response login(LoginRequest loginReq) {
+        if (loginReq == null || loginReq.getEmail() == null || loginReq.getPassword() == null) {
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("invalid or missing email/password")
+                    .entity("Identifiants manquants")
                     .build();
         }
+
         try {
-            User user = userService.getUserByEmail(email);
+            User user = userService.getUserByEmail(loginReq.getEmail());
 
-
-            if (user == null) {
+            if (user == null || !PasswordHasher.verifyPassword(loginReq.getPassword(), user.getPassword())) {
                 return Response.status(Response.Status.UNAUTHORIZED)
-                        .entity("invalid email/password")
+                        .entity("Email ou mot de passe incorrect")
                         .build();
             }
 
-            if (!PasswordHasher.verifyPassword(password, user.getPassword())) {
-                return Response.status(Response.Status.UNAUTHORIZED)
-                        .entity("invalid email/password")
-                        .build();
-            }
-            Date lastUpdateDate = user.getLastPasswordUpdate(); // Assumez que ce getter existe
-
-            if (lastUpdateDate == null) {
+            // Vérification de l'expiration
+            Date lastUpdateDate = user.getLastPasswordUpdate();
+            if (lastUpdateDate == null || (new Date().getTime() - lastUpdateDate.getTime() > MAX_PASSWORD_AGE_MS)) {
                 return Response.status(Response.Status.FORBIDDEN)
-                        .entity("Password expiration date is missing. Please update your password.")
+                        .entity("Mot de passe expiré")
                         .build();
             }
 
-            long ageMs = new Date().getTime() - lastUpdateDate.getTime();
+            // --- PROTOCOLE STARK : CRÉATION DU COOKIE SÉCURISÉ ---
+            NewCookie authCookie = new NewCookie(
+                    "AUTH_SESSION",      // Nom du cookie
+                    user.getEmail(),     // Valeur (on utilise l'email comme identifiant de session pour l'instant)
+                    "/",                 // Chemin : disponible sur toute l'application
+                    null,                // Domaine
+                    "Auth Cookie",       // Commentaire
+                    3600,                // Durée de vie : 1 heure (en secondes)
+                    false,               // Secure : mettre à true uniquement si vous utilisez HTTPS
+                    true                 // HTTP-ONLY : Empêche le JavaScript de lire le cookie (Protection XSS)
+            );
 
-            if (ageMs > MAX_PASSWORD_AGE_MS) {
-                return Response.status(Response.Status.FORBIDDEN)
-                        .entity("Password expired. Please use the /check endpoint to update your password.")
-                        .build();
-            }
-
-            // Si tout est bon
-            return Response.status(Response.Status.OK)
-                    .entity("Login successful." + Dto.userToDto(user))
+            // On renvoie le UserDto ET on attache le cookie à la réponse
+            return Response.ok(Dto.userToDto(user))
+                    .cookie(authCookie)
                     .build();
 
         } catch (Exception e) {
-            e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(e.getMessage())
                     .build();
