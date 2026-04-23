@@ -42,7 +42,9 @@ public class UserService implements IUserService {
 
         user.setIsActive(false);
         user.setLastPasswordUpdate(new Date());
-
+        if (user.getEnterprise() != null) {
+            user.getEnterprise().setUser(user);
+        }
         userRepository.addUser(user);
 
         PasswordHistory history = new PasswordHistory();
