@@ -25,7 +25,7 @@ public class ApplicationService implements IApplicationService {
             }
         }
         application.setApplyDate(new Date());
-        application.setStatus("En cours de traitement."); // Statut initial
+        application.setStatus("EN_ATTENTE"); // Statut initial
 
         this.applicationRepository.addApplication(application);
     }
