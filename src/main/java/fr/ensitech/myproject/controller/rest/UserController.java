@@ -6,6 +6,7 @@ import fr.ensitech.myproject.entity.dto.UserDto;
 import fr.ensitech.myproject.service.IUserService;
 import fr.ensitech.myproject.service.UserService;
 import fr.ensitech.myproject.utils.Dto;
+import fr.ensitech.myproject.utils.JwtUtil;
 import fr.ensitech.myproject.utils.PasswordHasher;
 
 import javax.ws.rs.*;
@@ -222,19 +223,23 @@ public class UserController implements IUserController{
                         .build();
             }
 
-            // --- PROTOCOLE STARK : CRÉATION DU COOKIE SÉCURISÉ ---
+            // --- PROTOCOLE STARK V2 : LE BADGE CRYPTOGRAPHIQUE (JWT) ---
+            // 1. On fabrique le jeton infalsifiable
+            String token = JwtUtil.generateToken(user.getEmail(), user.getRole().getName());
+
+            // 2. On l'insère dans le cookie sécurisé
             NewCookie authCookie = new NewCookie(
                     "AUTH_SESSION",      // Nom du cookie
-                    user.getEmail(),     // Valeur (on utilise l'email comme identifiant de session pour l'instant)
+                    token,               // LA NOUVELLE PUCE : Le JWT remplace l'email en clair
                     "/",                 // Chemin : disponible sur toute l'application
                     null,                // Domaine
-                    "Auth Cookie",       // Commentaire
-                    3600,                // Durée de vie : 1 heure (en secondes)
+                    "Auth Cookie JWT",   // Commentaire
+                    36000,               // Durée de vie : 10 heures (en secondes, pour matcher avec JwtUtil)
                     false,               // Secure : mettre à true uniquement si vous utilisez HTTPS
                     true                 // HTTP-ONLY : Empêche le JavaScript de lire le cookie (Protection XSS)
             );
 
-            // On renvoie le UserDto ET on attache le cookie à la réponse
+            // On renvoie le UserDto ET on attache le cookie blindé à la réponse
             return Response.ok(Dto.userToDto(user))
                     .cookie(authCookie)
                     .build();

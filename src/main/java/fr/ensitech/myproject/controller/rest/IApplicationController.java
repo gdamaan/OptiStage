@@ -11,10 +11,10 @@ public interface IApplicationController {
 
     Response getApplicationsByStudentId(Long studentId);
 
-    Response getApplicationsByOfferId(Long offerId);
+    Response getApplicationsByOfferId(Long offerId, String token);
 
     // Changer le statut (Accepter/Refuser)
-    Response updateApplicationStatus(Long id, String status);
+    Response updateApplicationStatus(Long id, String status, String token) throws Exception;
 
     Response deleteApplication(Long id);
 

@@ -36,14 +36,22 @@ public class ApplicationService implements IApplicationService {
     }
 
     @Override
-    public void updateApplicationStatus(Long applicationId, String newStatus) throws Exception {
+    public void updateApplicationStatus(Long applicationId, String newStatus, String requesterEmail) throws Exception {
         Application application = this.applicationRepository.getApplicationById(applicationId);
-        if (application != null) {
-            application.setStatus(newStatus);
-            this.applicationRepository.updateApplication(application);
-        } else {
+
+        if (application == null) {
             throw new Exception("Candidature introuvable pour la mise à jour du statut.");
         }
+
+        // On récupère l'email du tuteur qui a créé l'offre associée à cette candidature
+        String managerEmail = application.getOffer().getEnterprise().getUser().getEmail();
+
+        // On le compare avec l'email de la personne qui fait la requête
+        if (!managerEmail.equals(requesterEmail)) {
+            throw new Exception("Accès refusé : Vous n'êtes pas le propriétaire de cette offre.");
+        }
+        application.setStatus(newStatus);
+        this.applicationRepository.updateApplication(application);
     }
 
     @Override
