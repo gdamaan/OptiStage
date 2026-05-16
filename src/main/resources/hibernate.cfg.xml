@@ -24,6 +24,7 @@
         <mapping class="fr.ensitech.myproject.entity.InternshipOffer"/>
         <mapping class="fr.ensitech.myproject.entity.Application"/>
         <mapping class="fr.ensitech.myproject.entity.Role"/>
+        <mapping class="fr.ensitech.myproject.entity.Internship"></mapping>
 
     </session-factory>
 </hibernate-configuration>
