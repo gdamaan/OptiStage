@@ -1,6 +1,7 @@
 package fr.ensitech.myproject.service;
 
 import fr.ensitech.myproject.entity.Application;
+import fr.ensitech.myproject.entity.Internship; // N'oubliez pas cet import
 import fr.ensitech.myproject.repository.ApplicationRepository;
 import fr.ensitech.myproject.repository.IApplicationRepository;
 
@@ -9,6 +10,7 @@ import java.util.List;
 
 public class ApplicationService implements IApplicationService {
 
+    private final IInternshipService internshipService = new InternshipService();
     private final IApplicationRepository applicationRepository;
 
     public ApplicationService() {
@@ -50,8 +52,37 @@ public class ApplicationService implements IApplicationService {
         if (!managerEmail.equals(requesterEmail)) {
             throw new Exception("Accès refusé : Vous n'êtes pas le propriétaire de cette offre.");
         }
-        application.setStatus(newStatus);
-        this.applicationRepository.updateApplication(application);
+
+        // === L'AUTOMATISATION STARK : LOGIQUE HIGHLANDER ET CRÉATION DE STAGE ===
+        if ("ACCEPTE".equals(newStatus)) {
+            // On récupère toutes les candidatures pour cette offre
+            List<Application> allAppsForThisOffer = this.applicationRepository.getApplicationsByOffer(application.getOffer().getId());
+
+            for (Application app : allAppsForThisOffer) {
+                if (app.getId().equals(applicationId)) {
+                    // L'heureux élu
+                    app.setStatus("ACCEPTE");
+
+                    // On vérifie d'abord si un stage n'a pas déjà été créé pour éviter les doublons
+                    if (this.internshipService.getInternshipByApplicationId(app.getId()) == null) {
+                        Internship newInternship = new Internship();
+                        newInternship.setApplication(app);
+                        // On l'enregistre en base de données
+                        this.internshipService.createInternship(newInternship);
+                    }
+                } else {
+                    // Les autres candidats sont automatiquement refusés
+                    app.setStatus("REFUSE");
+                }
+                // On met à jour chaque candidature en base
+                this.applicationRepository.updateApplication(app);
+            }
+        } else {
+            // Si c'est juste un refus (ou autre statut), on ne touche qu'à cette candidature spécifique
+            application.setStatus(newStatus);
+            this.applicationRepository.updateApplication(application);
+        }
+        // =========================================================================
     }
 
     @Override

@@ -48,8 +48,5 @@ public class Internship  {
     @Column(name = "estValide", nullable = false)
     private Boolean estValide = false;
 
-    public Internship(Application application) {
-        this.application = application;
-    }
 
 }
