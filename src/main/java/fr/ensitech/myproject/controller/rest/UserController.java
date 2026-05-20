@@ -1,14 +1,18 @@
 package fr.ensitech.myproject.controller.rest;
 
+import fr.ensitech.myproject.annotation.Secured; // <-- NOTRE NOUVEAU PORTIQUE
 import fr.ensitech.myproject.entity.User;
+import fr.ensitech.myproject.entity.dto.LoginRequest;
 import fr.ensitech.myproject.entity.dto.UserDto;
 import fr.ensitech.myproject.service.IUserService;
 import fr.ensitech.myproject.service.UserService;
 import fr.ensitech.myproject.utils.Dto;
+import fr.ensitech.myproject.utils.JwtUtil;
 import fr.ensitech.myproject.utils.PasswordHasher;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.Date;
@@ -34,21 +38,15 @@ public class UserController implements IUserController{
     @Override
     @Path("/all")
     @GET
+    @Secured // <-- VERROUILLÉ : Seuls les utilisateurs avec badge peuvent voir la liste
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUsers() {
         try {
             List<User> users = userService.getAllUsers();
             List<UserDto> userDtos = new ArrayList<>();
 
-            // boucle avec foreach (Depuis Java 7)
-            //for (User user : users) {
-            //    userDtos.add(Dto.userToDto(user));
-            //}
-
-            // boucle avec l'API Expressions Lambda (Depuis Java 8)
             users.forEach(u -> userDtos.add(Dto.userToDto(u)));
 
-            //return Response.ok(users).build();
             return Response.status(Response.Status.OK)
                     .header("API REST", "Ecommerce")
                     .header("Content-Type", "application/json")
@@ -56,7 +54,6 @@ public class UserController implements IUserController{
                     .entity(userDtos)
                     .build();
         } catch (Exception e) {
-            //return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage()).build();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
     }
@@ -64,6 +61,7 @@ public class UserController implements IUserController{
     // uri => http://localhost:9991/ws/rest/users/28
     @GET
     @Path("/{ident}")
+    @Secured // <-- VERROUILLÉ : On protège les données individuelles
     @Produces(MediaType.APPLICATION_JSON)
     @Override
     public Response getUserById(@PathParam("ident") @DefaultValue("0") Long id) {
@@ -77,8 +75,6 @@ public class UserController implements IUserController{
             if (user == null) {
                 return Response.status(Response.Status.NOT_FOUND).entity("User with id = " + id + " not found").build();
             }
-            //return Response.ok(Dto.userToDto(user)).build();
-            //return Response.ok().entity(Dto.userToDto(user)).build();
             return Response.status(Response.Status.OK).entity(Dto.userToDto(user)).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
@@ -87,6 +83,7 @@ public class UserController implements IUserController{
     }
 
     // => http://127.0.0.1:9991/ws/rest/users/create
+    // PUBLIC : La porte d'entrée doit rester ouverte pour les nouveaux arrivants
     @POST
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -118,6 +115,7 @@ public class UserController implements IUserController{
     // => http://127.0.0.1:9991/ws/rest/users/update
     @PUT
     @Path("update")
+    @Secured // <-- VERROUILLÉ : Personne ne modifie un profil sans être connecté
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Override
@@ -135,8 +133,8 @@ public class UserController implements IUserController{
         try {
             userService.updateProfile(user);
             return Response.status(Response.Status.ACCEPTED)
-                            .entity("Profile updated with success.")
-                            .build();
+                    .entity("Profile updated with success.")
+                    .build();
         } catch (Exception e) {
             e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
@@ -146,6 +144,7 @@ public class UserController implements IUserController{
     // => http://127.0.0.1:9991/ws/rest/users/activate/4
     @PATCH
     @Path("/activate/{id}")
+    @Secured
     @Produces(MediaType.APPLICATION_JSON)
     @Override
     public Response activate(@PathParam("id") Long id) {
@@ -170,6 +169,7 @@ public class UserController implements IUserController{
 
     @PATCH
     @Path("/unsubscribe/{email}")
+    @Secured // <-- VERROUILLÉ
     @Produces(MediaType.APPLICATION_JSON)
     @Override
     public Response unsubscribe(@PathParam("email") String email) {
@@ -193,53 +193,50 @@ public class UserController implements IUserController{
 
 
     @POST
-    @Path("/login/{email}/{password}")
+    @Path("/login")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Override
-    public Response login(@PathParam("email") String email, @PathParam("password") String password) {
-        if (email == null || email.isBlank() || password == null || password.isBlank()) {
+    public Response login(LoginRequest loginReq) {
+        if (loginReq == null || loginReq.getEmail() == null || loginReq.getPassword() == null) {
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("invalid or missing email/password")
+                    .entity("Identifiants manquants")
                     .build();
         }
+
         try {
-            User user = userService.getUserByEmail(email);
+            User user = userService.getUserByEmail(loginReq.getEmail());
 
-
-            if (user == null) {
+            if (user == null || !PasswordHasher.verifyPassword(loginReq.getPassword(), user.getPassword())) {
                 return Response.status(Response.Status.UNAUTHORIZED)
-                        .entity("invalid email/password")
+                        .entity("Email ou mot de passe incorrect")
                         .build();
             }
 
-            if (!PasswordHasher.verifyPassword(password, user.getPassword())) {
-                return Response.status(Response.Status.UNAUTHORIZED)
-                        .entity("invalid email/password")
-                        .build();
-            }
-            Date lastUpdateDate = user.getLastPasswordUpdate(); // Assumez que ce getter existe
-
-            if (lastUpdateDate == null) {
+            Date lastUpdateDate = user.getLastPasswordUpdate();
+            if (lastUpdateDate == null || (new Date().getTime() - lastUpdateDate.getTime() > MAX_PASSWORD_AGE_MS)) {
                 return Response.status(Response.Status.FORBIDDEN)
-                        .entity("Password expiration date is missing. Please update your password.")
+                        .entity("Mot de passe expiré")
                         .build();
             }
 
-            long ageMs = new Date().getTime() - lastUpdateDate.getTime();
+            String token = JwtUtil.generateToken(user.getEmail(), user.getRole().getName());
 
-            if (ageMs > MAX_PASSWORD_AGE_MS) {
-                return Response.status(Response.Status.FORBIDDEN)
-                        .entity("Password expired. Please use the /check endpoint to update your password.")
-                        .build();
-            }
+            NewCookie authCookie = new NewCookie(
+                    "AUTH_SESSION",
+                    token,
+                    "/",
+                    null,
+                    "Auth Cookie JWT",
+                    36000,
+                    false,
+                    true
+            );
 
-            // Si tout est bon
-            return Response.status(Response.Status.OK)
-                    .entity("Login successful." + Dto.userToDto(user))
+            return Response.ok(Dto.userToDto(user))
+                    .cookie(authCookie)
                     .build();
 
         } catch (Exception e) {
-            e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(e.getMessage())
                     .build();
@@ -249,6 +246,7 @@ public class UserController implements IUserController{
 
     @POST
     @Path("/logout/{email}")
+    @Secured // <-- VERROUILLÉ : On ne déconnecte que si on est déjà connecté
     @Produces(MediaType.APPLICATION_JSON)
     @Override
     public Response logout(@PathParam("email") String email) {
@@ -272,6 +270,7 @@ public class UserController implements IUserController{
 
     @GET
     @Path("/question/{email}/{pwd}")
+    // PUBLIC : L'utilisateur a oublié son mot de passe, il n'a donc pas de badge
     @Produces(MediaType.APPLICATION_JSON)
     public Response getQuestion(@PathParam("email") String email, @PathParam("pwd") String oldPassword) throws Exception {
         if (email == null || email.isBlank() || oldPassword == null || oldPassword.isBlank()) {
@@ -295,6 +294,7 @@ public class UserController implements IUserController{
 
     @PUT
     @Path("/check/{email}/{pwd}/{response}")
+    // PUBLIC : Même logique, c'est pour rétablir un accès perdu
     @Produces(MediaType.APPLICATION_JSON)
     @Override
     public Response checkResponse(@PathParam("email") String email, @PathParam("pwd") String newpwd, @PathParam("response") String response) throws Exception {
@@ -332,6 +332,4 @@ public class UserController implements IUserController{
                     .build();
         }
     }
-
-
 }

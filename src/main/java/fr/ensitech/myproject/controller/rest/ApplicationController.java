@@ -6,6 +6,7 @@ import fr.ensitech.myproject.entity.User;
 import fr.ensitech.myproject.entity.dto.ApplicationDto;
 import fr.ensitech.myproject.service.*;
 import fr.ensitech.myproject.utils.Dto;
+import fr.ensitech.myproject.utils.JwtUtil; // NOUVEAU : Import de notre forge cryptographique
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -99,7 +100,19 @@ public class ApplicationController implements IApplicationController {
     @GET
     @Path("/offer/{id}")
     @Override
-    public Response getApplicationsByOfferId(@PathParam("id") Long offerId) {
+    public Response getApplicationsByOfferId(
+            @PathParam("id") Long offerId,
+            @CookieParam("AUTH_SESSION") String token // SÉCURISATION : Interception du JWT
+    ) {
+        // Lecture du badge
+        if (token == null || token.isBlank()) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Veuillez vous connecter.").build();
+        }
+        String requesterEmail = JwtUtil.extractEmail(token);
+        if (requesterEmail == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Session expirée ou invalide.").build();
+        }
+
         try {
             List<Application> allApps = appService.getApplicationsByOffer(offerId);
 
@@ -117,21 +130,38 @@ public class ApplicationController implements IApplicationController {
     @PUT
     @Path("/{id}/status")
     @Override
-    public Response updateApplicationStatus(@PathParam("id") Long id, @QueryParam("status") String status) {
+    public Response updateApplicationStatus(
+            @PathParam("id") Long id,
+            @QueryParam("status") String status,
+            @CookieParam("AUTH_SESSION") String token
+    ) {
+        if (token == null || token.isBlank()) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Veuillez vous connecter.").build();
+        }
+
+        // 2. Décryptage pour extraire l'email réel
+        String requesterEmail = JwtUtil.extractEmail(token);
+        if (requesterEmail == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Session expirée ou badge falsifié.").build();
+        }
+
         if (id == null || status == null || status.isBlank()) {
             return Response.status(Response.Status.BAD_REQUEST).entity("ID et Statut obligatoires").build();
         }
-        try {
-            Application app = appService.getApplicationById(id);
-            if (app == null) {
-                return Response.status(Response.Status.NOT_FOUND).entity("Candidature introuvable").build();
-            }
-            // Mise à jour manuelle du champ
-            app.setStatus(status);
-            appService.updateApplicationStatus(app.getId(), status);
 
+        try {
+            // Le Service se charge de vérifier la propriété et d'appliquer la règle du Highlander
+            appService.updateApplicationStatus(id, status, requesterEmail);
+
+            // On récupère la version mise à jour pour le Front-end
+            Application app = appService.getApplicationById(id);
             return Response.ok(Dto.applicationToDto(app)).build();
+
         } catch (Exception e) {
+            // Si l'exception de sécurité se déclenche, on renvoie une erreur 403 Forbidden
+            if (e.getMessage().contains("Accès refusé")) {
+                return Response.status(Response.Status.FORBIDDEN).entity(e.getMessage()).build();
+            }
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
     }
