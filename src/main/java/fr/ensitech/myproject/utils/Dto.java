@@ -15,6 +15,10 @@ public abstract class Dto {
         userDto.setEmail(user.getEmail());
         userDto.setBirthdate(user.getBirthdate());
         userDto.setIsActive(user.getIsActive());
+
+        if (user.getRole() != null) {
+            userDto.setRole(user.getRole().getName());
+        }
         return userDto;
     }
 
@@ -147,5 +151,19 @@ public abstract class Dto {
         }
 
         return app;
+    }
+
+    // Dans fr.ensitech.myproject.utils.Dto
+    public static QuestionDto questionToDto(Question question) {
+        if (question == null) return null;
+        return new QuestionDto(
+                question.getId(),
+                question.getQuestion()
+        );
+    }
+
+    public static RoleDto roleToDto(Role role) {
+        if (role == null) return null;
+        return new RoleDto(role.getId(), role.getName());
     }
 }

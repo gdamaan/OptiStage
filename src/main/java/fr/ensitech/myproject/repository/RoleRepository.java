@@ -4,6 +4,8 @@ import fr.ensitech.myproject.entity.Role;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 
+import java.util.List;
+
 public class RoleRepository {
     public Role getRoleByName(String roleName) throws Exception {
         Session session = null;
@@ -16,4 +18,13 @@ public class RoleRepository {
             if (session != null && session.isOpen()) session.close();
         }
     }
-}
+    public List<Role> getAllRoles() throws Exception {
+        Session session = null;
+        try {
+            session = HibernateConnector.getSession();
+            Query<Role> query = session.createQuery("from Role", Role.class);
+            return query.list();
+        } finally {
+            if (session != null && session.isOpen()) session.close();
+        }
+    }}

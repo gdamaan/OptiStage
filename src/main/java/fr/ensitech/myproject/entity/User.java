@@ -35,7 +35,7 @@ public class User {
 	@Column(name = "email", nullable = false, length = 48, unique = true)
 	private String email;
 
-	@Column(name = "pwd", nullable = false, length = 32)
+	@Column(name = "pwd", nullable = false, length = 256)
 	private String password;
 
 	@Column(name = "birthdate", nullable = true)
@@ -57,7 +57,7 @@ public class User {
     @JoinColumn(name = "question_id", nullable = false)
     private Question question;
 
-    @Column(name = "response",nullable = false, length = 32)
+    @Column(name = "response",nullable = false, length = 256)
     private String response;
 
     @Column(name = "last_password_update")

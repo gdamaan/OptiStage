@@ -29,13 +29,13 @@ public class Application {
     private String motivationLetter;
 
     // L'étudiant qui postule
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "student_id", nullable = false)
     @ToString.Exclude
     private User student;
 
     // L'offre concernée
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "offer_id", nullable = false)
     @ToString.Exclude
     private InternshipOffer offer;
