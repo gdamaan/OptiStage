@@ -14,7 +14,7 @@ public class InternshipRepository implements IInternshipRepository {
         Transaction transaction = null;
         try (Session session = HibernateConnector.getSession()) {
             transaction = session.beginTransaction();
-            session.save(internship);
+            session.merge(internship);
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) {
