@@ -1,0 +1,84 @@
+2026-05-21 10:44:16.954 [main] INFO  Version.logVersion:44 - HHH000412: Hibernate ORM core version 5.6.15.Final
+2026-05-21 10:44:17.760 [main] INFO  Version.<clinit>:56 - HCANN000001: Hibernate Commons Annotations {5.1.2.Final}
+2026-05-21 10:44:17.937 [main] WARN  pooling.configure:75 - HHH10001002: Using Hibernate built-in connection pool (not for production use!)
+2026-05-21 10:44:17.945 [main] INFO  pooling.buildCreator:119 - HHH10001005: using driver [com.mysql.cj.jdbc.Driver] at URL [jdbc:mysql://127.0.0.1:3306/myproject_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true]
+2026-05-21 10:44:17.953 [main] INFO  pooling.buildCreator:128 - HHH10001001: Connection properties: {password=****, user=root}
+2026-05-21 10:44:17.954 [main] INFO  pooling.buildCreator:132 - HHH10001003: Autocommit mode: false
+2026-05-21 10:44:17.959 [main] INFO  DriverManagerConnectionProviderImpl.<init>:322 - HHH000115: Hibernate connection pool size: 20 (min=1)
+2026-05-21 10:44:18.256 [main] INFO  Dialect.<init>:175 - HHH000400: Using dialect: org.hibernate.dialect.MySQL8Dialect
+2026-05-21 10:44:18.936 [main] INFO  Version.<clinit>:21 - HV000001: Hibernate Validator 6.2.5.Final
+2026-05-21 10:44:19.848 [main] INFO  access.getIsolatedConnection:48 - HHH10001501: Connection obtained from JdbcConnectionAccess [org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator$ConnectionProviderJdbcConnectionAccess@34330f77] for (non-JTA) DDL execution was not in auto-commit mode; the Connection 'local transaction' will be committed and the Connection will be set into auto-commit mode.
+2026-05-21 10:44:20.085 [main] INFO  JtaPlatformInitiator.initiateService:52 - HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2026-05-21 10:44:33.598 [grizzly-http-server-1] DEBUG SQL.logStatement:144 - 
+    select
+        role0_.id as id1_9_,
+        role0_.name as name2_9_ 
+    from
+        role role0_
+2026-05-21 10:44:33.598 [grizzly-http-server-0] DEBUG SQL.logStatement:144 - 
+    select
+        question0_.id as id1_6_,
+        question0_.question as question2_6_ 
+    from
+        myproject_db.question question0_
+2026-05-21 10:44:33.824 [grizzly-http-server-3] DEBUG SQL.logStatement:144 - 
+    select
+        role0_.id as id1_9_,
+        role0_.name as name2_9_ 
+    from
+        role role0_
+2026-05-21 10:44:33.824 [grizzly-http-server-2] DEBUG SQL.logStatement:144 - 
+    select
+        question0_.id as id1_6_,
+        question0_.question as question2_6_ 
+    from
+        myproject_db.question question0_
+2026-05-21 10:45:12.312 [grizzly-http-server-5] INFO  UserService.subscribe:25 - Tentative d'inscription du user avec mail : moroccopowaaa@gmail.com
+2026-05-21 10:45:12.322 [grizzly-http-server-5] DEBUG SQL.logStatement:144 - 
+    select
+        user0_.id as id1_7_,
+        user0_.birthdate as birthdat2_7_,
+        user0_.email as email3_7_,
+        user0_.firstname as firstnam4_7_,
+        user0_.active as active5_7_,
+        user0_.last_password_update as last_pas6_7_,
+        user0_.lastname as lastname7_7_,
+        user0_.pwd as pwd8_7_,
+        user0_.question_id as questio10_7_,
+        user0_.response as response9_7_,
+        user0_.role_id as role_id11_7_ 
+    from
+        myproject_db.user user0_ 
+    where
+        user0_.email=?
+2026-05-21 10:45:12.332 [grizzly-http-server-5] DEBUG SQL.logStatement:144 - 
+    select
+        role0_.id as id1_9_,
+        role0_.name as name2_9_ 
+    from
+        role role0_ 
+    where
+        role0_.name=?
+2026-05-21 10:45:13.954 [grizzly-http-server-5] DEBUG SQL.logStatement:144 - 
+    select
+        question_.id,
+        question_.question as question2_6_ 
+    from
+        myproject_db.question question_ 
+    where
+        question_.id=?
+2026-05-21 10:45:13.966 [grizzly-http-server-5] DEBUG SQL.logStatement:144 - 
+    insert 
+    into
+        myproject_db.user
+        (birthdate, email, firstname, active, last_password_update, lastname, pwd, question_id, response, role_id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+2026-05-21 10:45:14.005 [grizzly-http-server-5] INFO  UserService.subscribe:57 - User moroccopowaaa@gmail.com is subscribed with role Étudiant
+2026-05-21 10:45:14.011 [grizzly-http-server-5] DEBUG SQL.logStatement:144 - 
+    insert 
+    into
+        password_history
+        (change_date, old_password_hash, user_id) 
+    values
+        (?, ?, ?)
