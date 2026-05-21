@@ -166,4 +166,37 @@ public abstract class Dto {
         if (role == null) return null;
         return new RoleDto(role.getId(), role.getName());
     }
+
+    public static InternshipDto internshipToDto(Internship internship) {
+        if (internship == null) return null;
+
+        InternshipDto dto = new InternshipDto();
+        dto.setId(internship.getId());
+        dto.setConventionStatus(internship.getConventionStatus());
+        dto.setFinalGrade(internship.getNote_finale());
+        dto.setTutorFeedback(internship.getRapport_tuteur());
+
+        // Extraction sécurisée des données de la candidature liée
+        if (internship.getApplication() != null) {
+            dto.setApplicationId(internship.getApplication().getId());
+
+            if (internship.getApplication().getStudent() != null) {
+                dto.setStudentName(internship.getApplication().getStudent().getFirstname() + " " + internship.getApplication().getStudent().getLastname());
+            }
+            if (internship.getApplication().getOffer() != null) {
+                dto.setOfferTitle(internship.getApplication().getOffer().getTitle());
+                if (internship.getApplication().getOffer().getEnterprise() != null) {
+                    dto.setEnterpriseName(internship.getApplication().getOffer().getEnterprise().getName());
+                }
+            }
+        }
+
+        // Extraction du professeur référent (s'il est déjà assigné)
+        if (internship.getProfessor() != null) {
+            dto.setAcademicTutorId(internship.getProfessor().getId());
+            dto.setAcademicTutorName(internship.getProfessor().getFirstname() + " " + internship.getProfessor().getLastname());
+        }
+
+        return dto;
+    }
 }

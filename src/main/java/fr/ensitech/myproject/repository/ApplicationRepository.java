@@ -43,7 +43,7 @@ public class ApplicationRepository implements IApplicationRepository {
         try {
             session = HibernateConnector.getSession();
             tx = session.beginTransaction();
-            session.update(application);
+            session.merge(application);
             tx.commit();
         } catch (RollbackException e) {
             if (tx != null) tx.rollback();

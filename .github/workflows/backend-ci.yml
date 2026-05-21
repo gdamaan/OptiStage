@@ -1,0 +1,30 @@
+name: OptiStage Backend CI
+
+# Les Déclencheurs : Le pipeline s'active quand on pousse sur ces branches
+on:
+  push:
+    branches: [ "main", "test", "dev" ]
+  pull_request:
+    branches: [ "main", "test" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # Le système alloue un serveur virtuel Linux vierge
+
+    steps:
+    # 1. On récupère votre code source depuis le dépôt
+    - name: Extraction du code (Checkout)
+      uses: actions/checkout@v3
+
+    # 2. On installe la forge Java
+    - name: Configuration de l'environnement Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17' 
+        distribution: 'temurin'
+        cache: maven # Optimisation : garde les dépendances en mémoire pour accélérer le processus
+
+    # 3. On allume le réacteur
+    - name: Compilation Maven
+      run: mvn clean package -DskipTests
+      # Astuce d'ingénieur : Retirez "-DskipTests" le jour où vous écrirez des tests unitaires JUnit.
