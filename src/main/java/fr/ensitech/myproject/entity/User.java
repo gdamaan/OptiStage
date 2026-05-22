@@ -9,13 +9,14 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "user", catalog = "myproject_db")
+@Table(name = "`user`") // Les backticks pour H2 !
 @NamedQueries({
 	@NamedQuery(name = "User::findAll", query = "from User u"),
 	@NamedQuery(name = "User::findByBirthdate", query = "from User u where u.birthdate = :birthdate"),
 	@NamedQuery(name = "User::findByEmail", query = "from User u where u.email = :email")
 })
-@Getter @Setter @ToString
+@Getter @Setter @ToString @Builder
+@AllArgsConstructor
 public class User {
 
     public User() {
