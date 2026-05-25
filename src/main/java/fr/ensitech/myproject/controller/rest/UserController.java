@@ -82,8 +82,11 @@ public class UserController implements IUserController{
 
     }
 
-    // => http://127.0.0.1:9991/ws/rest/users/create
-    // PUBLIC : La porte d'entrée doit rester ouverte pour les nouveaux arrivants
+    /**
+     *
+     * @param user
+     * @return
+     */
     @POST
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)

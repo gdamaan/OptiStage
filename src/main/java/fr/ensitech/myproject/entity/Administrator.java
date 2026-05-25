@@ -4,7 +4,7 @@ import lombok.*;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "administrator", catalog = "myproject_db")
+@Table(name = "administrator")
 @Getter
 @Setter
 @ToString

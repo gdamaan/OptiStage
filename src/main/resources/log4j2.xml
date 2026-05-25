@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+
+    <!-- Variables globales -->
+    <Properties>
+        <Property name="LOG_PATH">logs</Property>
+        <Property name="APP_NAME">optistage-back</Property>
+        <Property name="PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %c{1}.%M:%L - %msg%n</Property>
+    </Properties>
+
+    <Appenders>
+
+        <!-- Console -->
+        <Console name="ConsoleAppender" target="SYSTEM_OUT">
+            <PatternLayout pattern="${PATTERN}"/>
+        </Console>
+
+        <!-- Fichier simple -->
+        <File name="FileAppender"
+              fileName="${LOG_PATH}/${APP_NAME}.log"
+              append="true">
+            <PatternLayout pattern="${PATTERN}"/>
+        </File>
+
+        <!-- Rolling File (rotation avancée) -->
+        <RollingFile name="RollingFileAppender"
+                     fileName="${LOG_PATH}/${APP_NAME}_rolling.log"
+                     filePattern="${LOG_PATH}/archive/${APP_NAME}-%d{yyyy-MM-dd HH:mm:ss}-%i.log">
+
+            <PatternLayout pattern="${PATTERN}"/>
+
+            <Policies>
+                <!-- Rotation quotidienne -->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+
+                <!-- Rotation par taille -->
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+
+    </Appenders>
+
+    <Loggers>
+
+        <!-- Logger spécifique (ex: service métier) -->
+        <Logger name="fr.ensitech.myproject" level="debug" additivity="false">
+            <AppenderRef ref="ConsoleAppender"/>
+            <AppenderRef ref="RollingFileAppender"/>
+        </Logger>
+
+        <!-- Logger SQL (optionnel) -->
+        <Logger name="org.hibernate.SQL" level="debug" additivity="false">
+            <AppenderRef ref="RollingFileAppender"/>
+        </Logger>
+
+        <!-- Root logger -->
+        <Root level="info">
+            <AppenderRef ref="ConsoleAppender"/>
+            <AppenderRef ref="RollingFileAppender"/>
+        </Root>
+
+    </Loggers>
+
+</Configuration>

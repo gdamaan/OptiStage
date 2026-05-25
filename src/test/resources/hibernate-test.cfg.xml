@@ -1,0 +1,42 @@
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+    <session-factory>
+
+        <property name="hibernate.current_session_context_class">thread</property>
+
+        <!-- Driver H2 -->
+        <property name="hibernate.connection.driver_class">org.h2.Driver</property>
+
+        <!-- URL base mémoire -->
+        <property name="hibernate.connection.url">jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1</property>
+
+        <property name="hibernate.connection.username">sa</property>
+        <property name="hibernate.connection.password"></property>
+
+        <!-- Dialect Hibernate pour H2 -->
+        <property name="hibernate.dialect">org.hibernate.dialect.H2Dialect</property>
+
+        <!-- Création auto du schéma -->
+        <property name="hibernate.hbm2ddl.auto">create-drop</property>
+
+        <!-- Debug SQL -->
+        <property name="hibernate.show_sql">true</property>
+        <property name="hibernate.format_sql">true</property>
+
+        <!-- Entité -->
+        <mapping class="fr.ensitech.myproject.entity.User"/>
+        <mapping class="fr.ensitech.myproject.entity.Role"/>
+        <mapping class="fr.ensitech.myproject.entity.Address"/>
+        <mapping class="fr.ensitech.myproject.entity.Question"/>
+        <mapping class="fr.ensitech.myproject.entity.PasswordHistory"/>
+        <mapping class="fr.ensitech.myproject.entity.Enterprise"/>
+        <mapping class="fr.ensitech.myproject.entity.InternshipOffer"/>
+        <mapping class="fr.ensitech.myproject.entity.Application"/>
+        <mapping class="fr.ensitech.myproject.entity.Internship"/>
+        <mapping class="fr.ensitech.myproject.entity.Administrator"/>
+
+    </session-factory>
+</hibernate-configuration>

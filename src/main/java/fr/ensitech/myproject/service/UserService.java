@@ -5,6 +5,8 @@ import fr.ensitech.myproject.entity.Role;
 import fr.ensitech.myproject.entity.User;
 import fr.ensitech.myproject.repository.*;
 import fr.ensitech.myproject.utils.PasswordHasher;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
 import org.hibernate.Session;
 
 import java.util.Date;
@@ -12,12 +14,15 @@ import java.util.List;
 
 public class UserService implements IUserService {
 
-    private final IUserRepository userRepository = new UserRepository();
-    private final IPasswordHistoryRepository historyRepository = new PasswordHistoryRepository();
-    private final RoleRepository roleRepository = new RoleRepository();
+    private static final Logger logger = (Logger) LogManager.getLogger(UserService.class);
+
+    private  IUserRepository userRepository = new UserRepository();
+    private  IPasswordHistoryRepository historyRepository = new PasswordHistoryRepository();
+    private  RoleRepository roleRepository = new RoleRepository();
 
     @Override
     public boolean subscribe(User user) throws Exception {
+        logger.info("Tentative d'inscription du user avec mail : {}", user.getEmail());
         User existingUser = userRepository.getUserByEmail(user.getEmail());
         if (existingUser != null) {
             return false;
@@ -49,6 +54,7 @@ public class UserService implements IUserService {
 
         // La sauvegarde en cascade (CascadeType.ALL) fera le reste sans erreur.
         userRepository.addUser(user);
+        logger.info("User {} is subscribed with role {}", user.getEmail(), role.getName());
 
         PasswordHistory history = new PasswordHistory();
         history.setOldPasswordHash(hashedPassword);
@@ -79,6 +85,7 @@ public class UserService implements IUserService {
 
     @Override
     public User getUserByEmail(String email) throws Exception {
+        logger.debug("getUserByEmail email : {}", email);
         if (email == null || email.isBlank()) {
             throw new IllegalArgumentException("email is null or blank");
         }

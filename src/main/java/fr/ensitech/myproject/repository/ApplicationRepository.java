@@ -1,6 +1,7 @@
 package fr.ensitech.myproject.repository;
 
 import fr.ensitech.myproject.entity.Application;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import javax.persistence.RollbackException;
@@ -30,7 +31,22 @@ public class ApplicationRepository implements IApplicationRepository {
         Session session = null;
         try {
             session = HibernateConnector.getSession();
-            return session.find(Application.class, id);
+            Application app = session.find(Application.class, id);
+
+            if (app != null) {
+                // On force le chargement des proxys
+                // avant que la session ne s'autodétruise.
+                Hibernate.initialize(app.getOffer());
+
+                if (app.getOffer() != null && app.getOffer().getEnterprise() != null) {
+                    Hibernate.initialize(app.getOffer().getEnterprise());
+
+                    if (app.getOffer().getEnterprise().getUser() != null) {
+                        Hibernate.initialize(app.getOffer().getEnterprise().getUser());
+                    }
+                }
+            }
+            return app;
         } finally {
             if (session != null && session.isOpen()) session.close();
         }
@@ -43,7 +59,7 @@ public class ApplicationRepository implements IApplicationRepository {
         try {
             session = HibernateConnector.getSession();
             tx = session.beginTransaction();
-            session.update(application);
+            session.merge(application);
             tx.commit();
         } catch (RollbackException e) {
             if (tx != null) tx.rollback();
@@ -88,7 +104,8 @@ public class ApplicationRepository implements IApplicationRepository {
         Session session = null;
         try {
             session = HibernateConnector.getSession();
-            return session.createQuery("from Application a where a.offer.id = :oId", Application.class)
+            // L'ajout de "join fetch a.offer" charge l'offre directement avec la candidature
+            return session.createQuery("from Application a join fetch a.offer where a.offer.id = :oId", Application.class)
                     .setParameter("oId", offerId)
                     .list();
         } finally {

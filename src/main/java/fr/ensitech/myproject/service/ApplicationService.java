@@ -67,6 +67,15 @@ public class ApplicationService implements IApplicationService {
                     if (this.internshipService.getInternshipByApplicationId(app.getId()) == null) {
                         Internship newInternship = new Internship();
                         newInternship.setApplication(app);
+
+                        // JARVIS PROTOCOL : Injection des données obligatoires depuis l'offre vers le stage
+                        if (app.getOffer() != null) {
+                            newInternship.setDateDebut(app.getOffer().getStartDate());
+                            newInternship.setDateFin(app.getOffer().getEndDate());
+                            // On récupère la description de l'offre pour remplir les missions initiales
+                            newInternship.setMissions(app.getOffer().getDescription());
+                        }
+
                         // On l'enregistre en base de données
                         this.internshipService.createInternship(newInternship);
                     }
