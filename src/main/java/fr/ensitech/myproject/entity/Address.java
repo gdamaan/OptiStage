@@ -5,8 +5,8 @@ import lombok.*;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "address", catalog = "myproject_db")
-@Getter @Setter @ToString @NoArgsConstructor @AllArgsConstructor
+@Table(name = "address")
+@Getter @Setter @ToString @NoArgsConstructor @AllArgsConstructor @Builder
 public class Address {
 
 	@Id

@@ -22,9 +22,13 @@ jobs:
       with:
         java-version: '17' 
         distribution: 'temurin'
-        cache: maven # Optimisation : garde les dépendances en mémoire pour accélérer le processus
+        cache: maven 
 
-    # 3. On allume le réacteur
-    - name: Compilation Maven
-      run: mvn clean package -DskipTests
-      # Astuce d'ingénieur : Retirez "-DskipTests" le jour où vous écrirez des tests unitaires JUnit.
+    # 3. NOUVEAU : Exécution stricte des bancs d'essai (JUnit & Mockito)
+    - name: Lancement des tests unitaires et d'intégration
+      run: mvn test
+
+    # 4. On allume le réacteur et on forge le JAR (uniquement si l'étape 3 a réussi)
+    - name: Compilation Maven et Création du Fat JAR
+      run: mvn package -DskipTests 
+      # (On peut skipper ici car la commande 'mvn test' vient juste de les exécuter)

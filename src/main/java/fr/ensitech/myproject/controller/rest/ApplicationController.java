@@ -158,8 +158,11 @@ public class ApplicationController implements IApplicationController {
             return Response.ok(Dto.applicationToDto(app)).build();
 
         } catch (Exception e) {
+            // JARVIS PROTOCOL : On force l'affichage de l'erreur dans la console
+            e.printStackTrace();
+
             // Si l'exception de sécurité se déclenche, on renvoie une erreur 403 Forbidden
-            if (e.getMessage().contains("Accès refusé")) {
+            if (e.getMessage() != null && e.getMessage().contains("Accès refusé")) {
                 return Response.status(Response.Status.FORBIDDEN).entity(e.getMessage()).build();
             }
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();

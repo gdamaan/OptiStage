@@ -7,7 +7,7 @@ import javax.persistence.*;
 
 
 @Entity
-@Table(name = "question", catalog = "myproject_db")
+@Table(name = "question")
 @Getter
 @Setter
 @ToString
