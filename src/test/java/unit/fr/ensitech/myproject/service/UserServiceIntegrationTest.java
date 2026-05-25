@@ -51,7 +51,7 @@ public class UserServiceIntegrationTest {
         Question question = session.createQuery("from Question", Question.class).setMaxResults(1).uniqueResult();
         if (question == null) {
             question = new Question();
-            question.setQuestion("Quel est le nom de votre premier animal de compagnie ?");
+            question.setQuestion("Nom de votre premier animal ?");
             session.save(question);
         }
 
@@ -77,11 +77,7 @@ public class UserServiceIntegrationTest {
             tx.rollback();
         }
 
-        // =================================================================
-        // Nettoyage post-test
-        // Les Repositories ayant commit de leur côté, un simple rollback
-        // de la session de test ne suffit pas. Il faut purger manuellement.
-        // =================================================================
+
         tx = session.beginTransaction();
         session.createQuery("delete from PasswordHistory").executeUpdate();
         session.createQuery("delete from User").executeUpdate();

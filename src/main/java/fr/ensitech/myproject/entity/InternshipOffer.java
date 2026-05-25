@@ -5,7 +5,7 @@ import javax.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "internship_offer", catalog = "myproject_db")
+@Table(name = "internship_offer")
 @Getter
 @Setter
 @ToString

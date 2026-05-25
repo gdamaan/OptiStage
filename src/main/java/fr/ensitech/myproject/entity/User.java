@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "`user`") // Les backticks pour H2 !
+@Table(name = "`user`")
 @NamedQueries({
 	@NamedQuery(name = "User::findAll", query = "from User u"),
 	@NamedQuery(name = "User::findByBirthdate", query = "from User u where u.birthdate = :birthdate"),

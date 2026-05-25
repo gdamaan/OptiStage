@@ -16,9 +16,9 @@ public class UserService implements IUserService {
 
     private static final Logger logger = (Logger) LogManager.getLogger(UserService.class);
 
-    private final IUserRepository userRepository = new UserRepository();
-    private final IPasswordHistoryRepository historyRepository = new PasswordHistoryRepository();
-    private final RoleRepository roleRepository = new RoleRepository();
+    private  IUserRepository userRepository = new UserRepository();
+    private  IPasswordHistoryRepository historyRepository = new PasswordHistoryRepository();
+    private  RoleRepository roleRepository = new RoleRepository();
 
     @Override
     public boolean subscribe(User user) throws Exception {

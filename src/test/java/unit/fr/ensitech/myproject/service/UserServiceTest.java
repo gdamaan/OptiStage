@@ -1,5 +1,6 @@
 package unit.fr.ensitech.myproject.service;
 
+import fr.ensitech.myproject.entity.Question;
 import fr.ensitech.myproject.entity.Role;
 import fr.ensitech.myproject.entity.User;
 import fr.ensitech.myproject.repository.IPasswordHistoryRepository;
@@ -32,6 +33,7 @@ public class UserServiceTest {
 
     private User user;
     private Role role;
+    private Question question; // On déclare la question même si elle n'est pas utilisée directement dans les tests, car elle est une dépendance de l'entité User.
 
     @BeforeClass
     public static void setUpClass() {}
@@ -43,7 +45,11 @@ public class UserServiceTest {
     public void setUp() {
         role = new Role();
         role.setId(1L);
-        role.setName("ETUDIANT");
+        role.setName("Étudiant");
+
+        question = new Question();
+        question.setId(1);
+        question.setQuestion("Nom de votre premier animal ?");
 
         user = User.builder()
                 .id(1L)
