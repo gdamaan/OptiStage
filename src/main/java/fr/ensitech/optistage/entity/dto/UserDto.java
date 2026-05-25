@@ -1,0 +1,18 @@
+package fr.ensitech.optistage.entity.dto;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
+
+import java.util.Date;
+
+@Data
+public class UserDto {
+    private Long id;
+    private String firstname;
+    private String lastname;
+    private String email;
+    private String role;
+    @JsonFormat(pattern = "dd/MM/yyyy")
+    private Date birthdate;
+    private Boolean isActive;
+}
