@@ -45,7 +45,7 @@
     <Loggers>
 
         <!-- Logger spécifique (ex: service métier) -->
-        <Logger name="fr.ensitech.myproject" level="debug" additivity="false">
+        <Logger name="fr.ensitech.optistage" level="debug" additivity="false">
             <AppenderRef ref="ConsoleAppender"/>
             <AppenderRef ref="RollingFileAppender"/>
         </Logger>

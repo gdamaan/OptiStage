@@ -1,0 +1,24 @@
+package fr.ensitech.optistage.entity;
+
+
+import lombok.*;
+
+import javax.persistence.*;
+
+
+@Entity
+@Table(name = "question")
+@Getter
+@Setter
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
+public class Question
+{
+    @Id
+    private int id;
+
+    @Column(name = "question", nullable = false, length = 50)
+    private String question;
+
+}
