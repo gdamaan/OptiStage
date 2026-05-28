@@ -1,0 +1,30 @@
+package fr.ensitech.optistage.repository;
+
+import fr.ensitech.optistage.entity.Role;
+import org.hibernate.Session;
+import org.hibernate.query.Query;
+
+import java.util.List;
+
+public class RoleRepository {
+    public Role getRoleByName(String roleName) throws Exception {
+        Session session = null;
+        try {
+            session = HibernateConnector.getSession();
+            Query<Role> query = session.createQuery("from Role where name = :name", Role.class);
+            query.setParameter("name", roleName);
+            return query.uniqueResult();
+        } finally {
+            if (session != null && session.isOpen()) session.close();
+        }
+    }
+    public List<Role> getAllRoles() throws Exception {
+        Session session = null;
+        try {
+            session = HibernateConnector.getSession();
+            Query<Role> query = session.createQuery("from Role", Role.class);
+            return query.list();
+        } finally {
+            if (session != null && session.isOpen()) session.close();
+        }
+    }}

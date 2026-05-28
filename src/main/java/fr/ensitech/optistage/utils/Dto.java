@@ -1,0 +1,202 @@
+package fr.ensitech.optistage.utils;
+import fr.ensitech.optistage.entity.*;
+import fr.ensitech.optistage.entity.dto.*;
+
+public abstract class Dto {
+
+    public static UserDto userToDto(User user) {
+        if (user == null) {
+            return null;
+        }
+        UserDto userDto = new UserDto();
+        userDto.setId(user.getId());
+        userDto.setFirstname(user.getFirstname());
+        userDto.setLastname(user.getLastname());
+        userDto.setEmail(user.getEmail());
+        userDto.setBirthdate(user.getBirthdate());
+        userDto.setIsActive(user.getIsActive());
+
+        if (user.getRole() != null) {
+            userDto.setRole(user.getRole().getName());
+        }
+        return userDto;
+    }
+
+    public static InternshipOfferDto offerToDto(InternshipOffer offer) {
+        if (offer == null) return null;
+
+        InternshipOfferDto dto = new InternshipOfferDto();
+        dto.setId(offer.getId());
+        dto.setTitle(offer.getTitle());
+        dto.setDescription(offer.getDescription());
+        dto.setStartDate(offer.getStartDate());
+        dto.setEndDate(offer.getEndDate());
+        dto.setSalary(offer.getRemuneration());
+        dto.setLocation(offer.getVille());
+
+        // On extrait le nom de l'entreprise si elle existe
+        if (offer.getEnterprise() != null) {
+            dto.setEnterpriseName(offer.getEnterprise().getName());
+            dto.setEnterpriseId(offer.getEnterprise().getId());
+        }
+
+        return dto;
+    }
+
+    public static EnterpriseDto enterpriseToDto(Enterprise enterprise) {
+        if (enterprise == null) return null;
+
+        EnterpriseDto dto = new EnterpriseDto();
+        dto.setId(enterprise.getId());
+        dto.setName(enterprise.getName());
+        dto.setSiret(enterprise.getSiret());
+        dto.setSector(enterprise.getSector());
+        dto.setDescription(enterprise.getDescription());
+        dto.setWebsite(enterprise.getWebsite());
+
+        if (enterprise.getUser() != null) {
+            dto.setManagerId(enterprise.getUser().getId());
+            // On concatène Prénom + Nom pour l'affichage
+            dto.setManagerName(enterprise.getUser().getFirstname() + " " + enterprise.getUser().getLastname());
+            dto.setManagerEmail(enterprise.getUser().getEmail());
+        }
+        return dto;
+    }
+
+    public static ApplicationDto applicationToDto(Application application) {
+        if (application == null) return null;
+
+        ApplicationDto dto = new ApplicationDto();
+        dto.setId(application.getId());
+        dto.setApplyDate(application.getApplyDate());
+        dto.setStatus(application.getStatus());
+        dto.setMotivationLetter(application.getMotivationLetter());
+
+        if (application.getStudent() != null) {
+            dto.setStudentId(application.getStudent().getId());
+            dto.setStudentName(application.getStudent().getFirstname() + " " + application.getStudent().getLastname());
+        }
+
+        // Récupération des infos de l'offre et de l'entreprise
+        if (application.getOffer() != null) {
+            dto.setOfferId(application.getOffer().getId());
+            dto.setOfferTitle(application.getOffer().getTitle());
+            if (application.getOffer().getEnterprise() != null) {
+                dto.setEnterpriseName(application.getOffer().getEnterprise().getName());
+            }
+        }
+
+        return dto;
+    }
+
+    // Ajoutez cette méthode à la fin de votre classe Dto
+    public static Enterprise fromDto(EnterpriseDto dto, User manager) {
+        if (dto == null) return null;
+
+        Enterprise enterprise = new Enterprise();
+        // Si l'ID est présent (cas de l'update), on le garde
+        enterprise.setId(dto.getId());
+
+        enterprise.setName(dto.getName());
+        enterprise.setSiret(dto.getSiret());
+        enterprise.setSector(dto.getSector());
+        enterprise.setDescription(dto.getDescription());
+        enterprise.setWebsite(dto.getWebsite());
+
+        // On attache le recruteur qu'on a récupéré
+        if (manager != null) {
+            enterprise.setUser(manager);
+        }
+
+        return enterprise;
+    }
+
+    public static InternshipOffer fromDto(InternshipOfferDto dto, Enterprise enterprise) {
+        if (dto == null) return null;
+
+        InternshipOffer offer = new InternshipOffer();
+        offer.setId(dto.getId());
+        offer.setTitle(dto.getTitle());
+        offer.setDescription(dto.getDescription());
+        offer.setVille(dto.getLocation());
+        offer.setStartDate(dto.getStartDate());
+        offer.setEndDate(dto.getEndDate());
+        offer.setRemuneration(dto.getSalary());
+
+        offer.setStatus("ACTIVE");
+
+        if (enterprise != null) {
+            offer.setEnterprise(enterprise);
+        }
+
+        return offer;
+    }
+
+    public static Application fromDto(ApplicationDto dto, User student, InternshipOffer offer) {
+        if (dto == null) return null;
+
+        Application app = new Application();
+        app.setId(dto.getId());
+        // La lettre de motivation est le seul champ "texte" que l'étudiant envoie
+        app.setMotivationLetter(dto.getMotivationLetter());
+        app.setApplyDate(new java.util.Date());
+        app.setStatus("PENDING");
+
+        //  liens relations
+        if (student != null) {
+            app.setStudent(student);
+        }
+        if (offer != null) {
+            app.setOffer(offer);
+        }
+
+        return app;
+    }
+
+    // Dans fr.ensitech.optistage.utils.Dto
+    public static QuestionDto questionToDto(Question question) {
+        if (question == null) return null;
+        return new QuestionDto(
+                question.getId(),
+                question.getQuestion()
+        );
+    }
+
+    public static RoleDto roleToDto(Role role) {
+        if (role == null) return null;
+        return new RoleDto(role.getId(), role.getName());
+    }
+
+    public static InternshipDto internshipToDto(Internship internship) {
+        if (internship == null) return null;
+
+        InternshipDto dto = new InternshipDto();
+        dto.setId(internship.getId());
+        dto.setConventionStatus(internship.getConventionStatus());
+        dto.setFinalGrade(internship.getNote_finale());
+        dto.setTutorFeedback(internship.getRapport_tuteur());
+
+        // Extraction sécurisée des données de la candidature liée
+        if (internship.getApplication() != null) {
+            dto.setApplicationId(internship.getApplication().getId());
+
+            if (internship.getApplication().getStudent() != null) {
+                dto.setStudentName(internship.getApplication().getStudent().getFirstname() + " " + internship.getApplication().getStudent().getLastname());
+            }
+            if (internship.getApplication().getOffer() != null) {
+                dto.setOfferTitle(internship.getApplication().getOffer().getTitle());
+                if (internship.getApplication().getOffer().getEnterprise() != null) {
+                    dto.setEnterpriseName(internship.getApplication().getOffer().getEnterprise().getName());
+                }
+            }
+        }
+
+        // Extraction du professeur référent (s'il est déjà assigné)
+        if (internship.getProfessor() != null) {
+            dto.setAcademicTutorId(internship.getProfessor().getId());
+            dto.setAcademicTutorName(internship.getProfessor().getFirstname() + " " + internship.getProfessor().getLastname());
+        }
+
+        return dto;
+    }
+}
