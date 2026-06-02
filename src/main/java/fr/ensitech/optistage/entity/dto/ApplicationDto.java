@@ -10,6 +10,9 @@ public class ApplicationDto {
     private String status;
     private String motivationLetter;
 
+    // Le fameux lien vers le CV NoSQL
+    private String cvId;
+
     // Infos de l'étudiant (pour le recruteur)
     private Long studentId;
     private String studentName;
