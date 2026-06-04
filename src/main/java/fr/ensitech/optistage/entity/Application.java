@@ -23,7 +23,9 @@ public class Application {
     @Column(name = "status", nullable = false, length = 20)
     private String status;
 
-    //TODO ajouter le CV au champ et à la bdd
+    // L'identifiant du CV stocké dans la base NoSQL
+    @Column(name = "cv_id")
+    private String cvId;
 
     @Column(name = "motivation_letter", columnDefinition = "TEXT")
     private String motivationLetter;

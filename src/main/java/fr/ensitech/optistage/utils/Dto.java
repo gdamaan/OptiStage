@@ -72,6 +72,9 @@ public abstract class Dto {
         dto.setStatus(application.getStatus());
         dto.setMotivationLetter(application.getMotivationLetter());
 
+        // NOUVEAU : On extrait l'ID du CV de la BDD pour l'envoyer au Front
+        dto.setCvId(application.getCvId());
+
         if (application.getStudent() != null) {
             dto.setStudentId(application.getStudent().getId());
             dto.setStudentName(application.getStudent().getFirstname() + " " + application.getStudent().getLastname());
@@ -137,12 +140,13 @@ public abstract class Dto {
 
         Application app = new Application();
         app.setId(dto.getId());
-        // La lettre de motivation est le seul champ "texte" que l'étudiant envoie
         app.setMotivationLetter(dto.getMotivationLetter());
         app.setApplyDate(new java.util.Date());
-        app.setStatus("PENDING");
+        app.setStatus("EN_ATTENTE"); // Au passage, j'ai remis votre statut en Français comme dans votre BDD
+        // NOUVEAU : LE FAMEUX PONT ! On injecte le cvId reçu du Front dans l'Entité
+        app.setCvId(dto.getCvId());
 
-        //  liens relations
+        // liens relations
         if (student != null) {
             app.setStudent(student);
         }
