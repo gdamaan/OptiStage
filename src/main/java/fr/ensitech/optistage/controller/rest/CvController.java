@@ -22,17 +22,21 @@ public class CvController implements ICvController {
     }
 
     @POST
-    @Path("/{studentId}")
-    @Secured // <-- VERROUILLAGE ACTIVÉ
+    @Path("/upload")
+    @Secured
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Override
-    public Response uploadCv(@PathParam("studentId") int studentId, CvUploadDto cvDto) {
+    public Response uploadCv(CvUploadDto cvDto) {
         try {
-            cvService.saveCv(studentId, cvDto.getFileName(), cvDto.getBase64Content());
+            // ATTENTION MONSIEUR : Votre CvService.saveCv doit maintenant renvoyer le String de l'ID généré par la BDD NoSQL
+            String generatedCvId = cvService.saveCv(cvDto.getFileName(), cvDto.getBase64Content());
 
             Map<String, String> response = new HashMap<>();
-            response.put("message", "Le CV a été stocké avec succès la base de données.");
+            response.put("message", "Le CV a été stocké avec succès dans la base NoSQL.");
+            // On renvoie cet ID au Front-end pour qu'il le glisse dans la candidature
+            response.put("cvId", generatedCvId);
+
             return Response.ok(response).build();
 
         } catch (IllegalArgumentException e) {
@@ -43,22 +47,22 @@ public class CvController implements ICvController {
     }
 
     @GET
-    @Path("/{studentId}")
-    @Secured // <-- VERROUILLAGE ACTIVÉ
+    @Path("/{cvId}")
+    @Secured
     @Produces(MediaType.APPLICATION_JSON)
     @Override
-    public Response getCv(@PathParam("studentId") int studentId) {
+    public Response getCv(@PathParam("cvId") String cvId) {
         try {
-            Document cvDoc = cvService.getCv(studentId);
+            // ATTENTION MONSIEUR : Votre CvService.getCv doit maintenant prendre un String en paramètre
+            Document cvDoc = cvService.getCv(cvId);
 
             if (cvDoc == null) {
                 return Response.status(Response.Status.NOT_FOUND)
-                        .entity("Aucun CV trouvé pour cet étudiant.")
+                        .entity("Aucun CV trouvé pour cet identifiant.")
                         .build();
             }
 
             Map<String, Object> response = new HashMap<>();
-            response.put("studentId", cvDoc.getInteger("studentId"));
             response.put("fileName", cvDoc.getString("fileName"));
             response.put("content", cvDoc.getString("content"));
 

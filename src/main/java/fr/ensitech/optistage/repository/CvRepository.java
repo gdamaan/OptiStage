@@ -2,6 +2,7 @@ package fr.ensitech.optistage.repository;
 
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 import static com.mongodb.client.model.Filters.eq;
 
 public class CvRepository implements ICvRepository {
@@ -11,20 +12,24 @@ public class CvRepository implements ICvRepository {
     }
 
     @Override
-    public void saveCv(int studentId, String fileName, String base64Content) {
+    public String saveCv(String fileName, String base64Content) {
         MongoCollection<Document> collection = getCollection();
-        collection.deleteOne(eq("studentId", studentId));
 
-        Document cvDocument = new Document("studentId", studentId)
-                .append("fileName", fileName)
+        // On ne supprime plus les anciens CV car un étudiant peut en avoir plusieurs
+        Document cvDocument = new Document("fileName", fileName)
                 .append("content", base64Content)
                 .append("uploadDate", new java.util.Date());
 
+        // L'insertion génère automatiquement un champ "_id" de type ObjectId
         collection.insertOne(cvDocument);
+
+        // On extrait cet identifiant magique et on le renvoie en format Texte
+        return cvDocument.getObjectId("_id").toHexString();
     }
 
     @Override
-    public Document getCv(int studentId) {
-        return getCollection().find(eq("studentId", studentId)).first();
+    public Document getCv(String cvId) {
+        // MongoDB a besoin de transformer notre texte "64f1a2..." en vrai ObjectId pour chercher
+        return getCollection().find(eq("_id", new ObjectId(cvId))).first();
     }
 }

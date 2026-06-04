@@ -3,13 +3,10 @@ package fr.ensitech.optistage.service;
 import org.bson.Document;
 
 public interface ICvService {
-    /**
-     * Traite et valide le CV avant envoi au stockage NoSQL.
-     */
-    void saveCv(int studentId, String fileName, String base64Content);
 
-    /**
-     * Récupère le document CV de l'étudiant.
-     */
-    Document getCv(int studentId);
+    // Sauvegarde le CV et renvoie l'ID généré par MongoDB
+    String saveCv(String fileName, String base64Content);
+
+    // Récupère le CV grâce à cet ID
+    Document getCv(String cvId);
 }

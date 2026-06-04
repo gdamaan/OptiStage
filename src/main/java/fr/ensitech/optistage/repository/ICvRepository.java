@@ -3,13 +3,10 @@ package fr.ensitech.optistage.repository;
 import org.bson.Document;
 
 public interface ICvRepository {
-    /**
-     * Sauvegarde ou écrase le CV d'un étudiant.
-     */
-    void saveCv(int studentId, String fileName, String base64Content);
 
-    /**
-     * Récupère le document CV d'un étudiant.
-     */
-    Document getCv(int studentId);
+    // Même chose ici, on renvoie une chaîne de caractères (L'ID)
+    String saveCv(String fileName, String base64Content);
+
+    // On cherche via la chaîne de caractères
+    Document getCv(String cvId);
 }

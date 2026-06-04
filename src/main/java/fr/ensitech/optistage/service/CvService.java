@@ -13,22 +13,23 @@ public class CvService implements ICvService {
     }
 
     @Override
-    public void saveCv(int studentId, String fileName, String base64Content) {
+    public String saveCv(String fileName, String base64Content) {
         // Validation de sécurité élémentaire
         if (base64Content == null || base64Content.trim().isEmpty()) {
             throw new IllegalArgumentException("Le contenu du CV en Base64 ne peut pas être vide");
         }
 
         if (fileName == null || fileName.trim().isEmpty()) {
-            fileName = "cv_etudiant_" + studentId + ".pdf";
+            fileName = "cv_candidature.pdf"; // Nom générique de secours
         }
 
-        // Transmission au stockage
-        cvRepository.saveCv(studentId, fileName, base64Content);
+        // Transmission au stockage et récupération de l'ID généré (Mongo ObjectId en String)
+        return cvRepository.saveCv(fileName, base64Content);
     }
 
     @Override
-    public Document getCv(int studentId) {
-        return cvRepository.getCv(studentId);
+    public Document getCv(String cvId) {
+        // On demande désormais à la base de chercher via l'identifiant NoSQL
+        return cvRepository.getCv(cvId);
     }
 }
