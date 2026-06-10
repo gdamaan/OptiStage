@@ -62,7 +62,32 @@ public class UserService implements IUserService {
         history.setChangeDate(new Date());
 
         historyRepository.addHistory(history);
+        // --- DÉBUT DE LA LOGIQUE ASYNCHRONE ---
+        java.util.concurrent.CompletableFuture.runAsync(() -> {
+            try {
+                // 1. Génération du token avec la méthode exacte de votre JwtUtil
+                String validationToken = fr.ensitech.optistage.utils.JwtUtil.generateToken(user.getEmail(), role.getName());
 
+                // 2. On redirige maintenant vers la future page React
+                String validationLink = "http://localhost:5173/validate?token=" + validationToken;
+                // 3. Contenu strictement professionnel pour le jury
+                String subject = "OptiStage - Activation de votre compte";
+                String content = "Bonjour " + user.getFirstname() + ",\n\n"
+                        + "Votre compte a été créé avec succès.\n"
+                        + "Afin de finaliser votre inscription et d'activer votre accès, veuillez cliquer sur le lien ci-dessous :\n\n"
+                        + validationLink + "\n\n"
+                        + "Si le lien n'est pas cliquable, veuillez le copier puis le coller dans la barre d'adresse de votre navigateur.\n\n"
+                        + "Cordialement,\n"
+                        + "L'équipe OptiStage.";
+
+                // 4. Expédition
+                EmailService.sendEmail(user.getEmail(), subject, content);
+
+                logger.info("Email de validation expédié avec succès à {}", user.getEmail());
+            } catch (Exception e) {
+                logger.error("Échec lors de l'envoi de l'email à {}", user.getEmail(), e);
+            }
+        });
         return true;
     }
 
