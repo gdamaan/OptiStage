@@ -15,7 +15,6 @@ public class CvRepository implements ICvRepository {
     public String saveCv(String fileName, String base64Content) {
         MongoCollection<Document> collection = getCollection();
 
-        // On ne supprime plus les anciens CV car un étudiant peut en avoir plusieurs
         Document cvDocument = new Document("fileName", fileName)
                 .append("content", base64Content)
                 .append("uploadDate", new java.util.Date());

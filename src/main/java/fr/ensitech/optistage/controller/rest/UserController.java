@@ -6,6 +6,7 @@ import fr.ensitech.optistage.entity.dto.LoginRequest;
 import fr.ensitech.optistage.entity.dto.UserDto;
 import fr.ensitech.optistage.service.IUserService;
 import fr.ensitech.optistage.service.UserService;
+import fr.ensitech.optistage.utils.CaptchaValidator;
 import fr.ensitech.optistage.utils.Dto;
 import fr.ensitech.optistage.utils.JwtUtil;
 import fr.ensitech.optistage.utils.PasswordHasher;
@@ -80,6 +81,49 @@ public class UserController implements IUserController{
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
 
+    }
+
+    @GET
+    @Path("/validate")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response validateUser(@QueryParam("token") String token) {
+        try {
+            // 1. Vérification de la présence du token
+            if (token == null || token.isBlank()) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("{\"error\": \"Le jeton de validation est manquant.\"}")
+                        .build();
+            }
+
+            // 2. Extraction et validation de l'adresse email contenue dans le JWT
+            String email = fr.ensitech.optistage.utils.JwtUtil.extractEmail(token);
+            if (email == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("{\"error\": \"Le jeton est invalide ou a expiré.\"}")
+                        .build();
+            }
+
+            // 3. Récupération de l'utilisateur correspondant pour obtenir son ID
+            User user = userService.getUserByEmail(email);
+            if (user == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("{\"error\": \"Aucun utilisateur associé à ce jeton.\"}")
+                        .build();
+            }
+
+            // 4. Activation du compte en base de données
+            userService.activate(user.getId());
+
+            // 5. Réponse de succès professionnelle
+            // Note : Vous pouvez retourner un JSON ou rediriger directement vers votre page de login React
+            return Response.ok("{\"message\": \"Votre compte a été activé avec succès. Vous pouvez maintenant vous connecter.\"}")
+                    .build();
+
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\": \"Une erreur interne est survenue lors de l'activation : " + e.getMessage() + "\"}")
+                    .build();
+        }
     }
 
     /**
@@ -200,12 +244,21 @@ public class UserController implements IUserController{
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response login(LoginRequest loginReq) {
+        // 1. Vérification des données de base
         if (loginReq == null || loginReq.getEmail() == null || loginReq.getPassword() == null) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Identifiants manquants")
                     .build();
         }
 
+        // 2. VÉRIFICATION DE SÉCURITÉ ANTI-BOTS (CAPTCHA)
+        if (!CaptchaValidator.isValid(loginReq.getCaptchaToken())) {
+            return Response.status(Response.Status.FORBIDDEN)
+                    .entity("Échec de la validation de sécurité (CAPTCHA). Êtes-vous un robot, Monsieur ?")
+                    .build();
+        }
+
+        // 3. Suite normale du code
         try {
             User user = userService.getUserByEmail(loginReq.getEmail());
 
@@ -231,12 +284,14 @@ public class UserController implements IUserController{
                     null,
                     "Auth Cookie JWT",
                     36000,
-                    false,
+                    false, // À passer en true en prod pour activer le flag Secure et n'envoyer le cookie que sur HTTPS
                     true
             );
 
+            String cookieString = authCookie.toString() + "; SameSite=Strict";
+
             return Response.ok(Dto.userToDto(user))
-                    .cookie(authCookie)
+                    .header("Set-Cookie", cookieString)
                     .build();
 
         } catch (Exception e) {
@@ -245,7 +300,6 @@ public class UserController implements IUserController{
                     .build();
         }
     }
-
 
     @POST
     @Path("/logout/{email}")
