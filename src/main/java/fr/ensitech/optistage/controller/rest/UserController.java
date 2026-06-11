@@ -254,11 +254,10 @@ public class UserController implements IUserController{
         // 2. VÉRIFICATION DE SÉCURITÉ ANTI-BOTS (CAPTCHA)
         if (!CaptchaValidator.isValid(loginReq.getCaptchaToken())) {
             return Response.status(Response.Status.FORBIDDEN)
-                    .entity("Échec de la validation de sécurité (CAPTCHA). Êtes-vous un robot, Monsieur ?")
+                    .entity("Échec de la validation de sécurité (CAPTCHA). Veuillez réessayer.")
                     .build();
         }
-
-        // 3. Suite normale du code
+        // 3. Suite du code
         try {
             User user = userService.getUserByEmail(loginReq.getEmail());
 
@@ -287,8 +286,7 @@ public class UserController implements IUserController{
                     false, // À passer en true en prod pour activer le flag Secure et n'envoyer le cookie que sur HTTPS
                     true
             );
-
-            String cookieString = authCookie.toString() + "; SameSite=Strict";
+            String cookieString = authCookie.toString() + "; SameSite=Lax";
 
             return Response.ok(Dto.userToDto(user))
                     .header("Set-Cookie", cookieString)

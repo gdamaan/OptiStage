@@ -7,6 +7,7 @@ import fr.ensitech.optistage.entity.dto.ApplicationDto;
 import fr.ensitech.optistage.service.*;
 import fr.ensitech.optistage.utils.Dto;
 import fr.ensitech.optistage.utils.JwtUtil; // NOUVEAU : Import de notre forge cryptographique
+import fr.ensitech.optistage.utils.SanitizerUtil;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -23,7 +24,6 @@ public class ApplicationController implements IApplicationController {
     private final IUserService userService = new UserService();
     private final IInternshipOfferService offerService = new InternshipOfferService();
 
-    // 1. CRÉATION
     @POST
     @Path("/create")
     @Override
@@ -39,19 +39,17 @@ public class ApplicationController implements IApplicationController {
             // Récupération des entités liées
             User student = userService.getUserById(dto.getStudentId());
             InternshipOffer offer = offerService.getOfferById(dto.getOfferId());
-
             if (student == null) {
                 return Response.status(Response.Status.NOT_FOUND).entity("Étudiant introuvable").build();
             }
             if (offer == null) {
                 return Response.status(Response.Status.NOT_FOUND).entity("Offre introuvable").build();
             }
-
-            // Assemblage et sauvegarde
+            if (dto.getMotivationLetter() != null) {
+                dto.setMotivationLetter(SanitizerUtil.sanitize(dto.getMotivationLetter()));
+            }
             Application app = Dto.fromDto(dto, student, offer);
             appService.createApplication(app);
-
-            // Retour propre
             return Response.status(Response.Status.CREATED).entity(Dto.applicationToDto(app)).build();
         } catch (Exception e) {
             e.printStackTrace();

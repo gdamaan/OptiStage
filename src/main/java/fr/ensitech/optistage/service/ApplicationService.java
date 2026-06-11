@@ -53,7 +53,7 @@ public class ApplicationService implements IApplicationService {
             throw new Exception("Accès refusé : Vous n'êtes pas le propriétaire de cette offre.");
         }
 
-        // === L'AUTOMATISATION STARK : LOGIQUE HIGHLANDER ET CRÉATION DE STAGE ===
+        // === L'AUTOMATISATION : LOGIQUE CRÉATION DE STAGE ===
         if ("ACCEPTE".equals(newStatus)) {
             // On récupère toutes les candidatures pour cette offre
             List<Application> allAppsForThisOffer = this.applicationRepository.getApplicationsByOffer(application.getOffer().getId());
@@ -68,7 +68,7 @@ public class ApplicationService implements IApplicationService {
                         Internship newInternship = new Internship();
                         newInternship.setApplication(app);
 
-                        // JARVIS PROTOCOL : Injection des données obligatoires depuis l'offre vers le stage
+                        //  Injection des données obligatoires depuis l'offre vers le stage
                         if (app.getOffer() != null) {
                             newInternship.setDateDebut(app.getOffer().getStartDate());
                             newInternship.setDateFin(app.getOffer().getEndDate());
@@ -91,7 +91,6 @@ public class ApplicationService implements IApplicationService {
             application.setStatus(newStatus);
             this.applicationRepository.updateApplication(application);
         }
-        // =========================================================================
     }
 
     @Override
